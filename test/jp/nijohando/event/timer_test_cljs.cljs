@@ -27,7 +27,8 @@
                   time (- (now) start)]
               (f/ensure x)
               (is (nil? (:value x)))
-              (is (and (> time 1000) (< time 1200)))
+              (is (>= time 900))
+              (is (<= time 1100))
               (done)
               (end))))))))
 
@@ -48,7 +49,8 @@
               (f/ensure x)
               (is (= "/foo/bar" (:path x)))
               (is (= :baz (:value x)))
-              (is (and (> time 1000) (< time 1200)))
+              (is (>= time 900))
+              (is (<= time 1100))
               (done)
               (end))))))))
 
@@ -69,7 +71,8 @@
               (f/ensure x)
               (is (= "/foo/bar" (:path x)))
               (is (= :baz (:value x)))
-              (is (and (> time 1000) (< time 1200)))
+              (is (>= time 900))
+              (is (<= time 1100))
               (done)
               (end))))))))
 
@@ -158,23 +161,26 @@
              task-id (tm/repeat! timer 3000 1000)]
          (ev/listen timer (str "/tasks/" task-id) listener)
          (ca/go
-           (let [x (xa/<! listener :timeout 2000)
-                 time (- (now) @start)]
-             (reset! start (now))
-             (f/ensure x)
-             (is (nil? (:value x)))
-             (is (and (> time 1000) (< time 1200))))
            (let [x (xa/<! listener :timeout 4000)
                  time (- (now) @start)]
              (reset! start (now))
              (f/ensure x)
              (is (nil? (:value x)))
-             (is (and (> time 3000) (< time 3200))))
+             (is (>= time 900))
+             (is (<= time 1100)))
+           (let [x (xa/<! listener :timeout 4000)
+                 time (- (now) @start)]
+             (reset! start (now))
+             (f/ensure x)
+             (is (nil? (:value x)))
+             (is (>= time 2900))
+             (is (<= time 3100)))
            (let [x (xa/<! listener :timeout 4000)
                  time (- (now) @start)]
              (f/ensure x)
              (is (nil? (:value x)))
-             (is (and (> time 3000) (< time 3200)))
+             (is (>= time 2900))
+             (is (<= time 3100))
              (is (f/succ? (tm/cancel! timer task-id))))
            (done)
            (end)))))))

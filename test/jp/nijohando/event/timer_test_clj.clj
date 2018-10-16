@@ -25,7 +25,8 @@
               time (- (now) start)]
           (f/ensure x)
           (is (nil? (:value x)))
-          (is (and (> time 1000) (< time 1200)))))))
+          (is (>= time 900))
+          (is (<= time 1100))))))
   (testing "Custom once timer event can be got after delay"
     (d/do*
       (let [timer (tm/timer)
@@ -41,7 +42,8 @@
           (f/ensure x)
           (is (= "/foo/bar" (:path x)))
           (is (= :baz (:value x)))
-          (is (and (> time 1000) (< time 1200)))))))
+          (is (>= time 900))
+          (is (<= time 1100))))))
 
   (testing "Custom once timer event can be created by function"
     (d/do*
@@ -58,7 +60,8 @@
           (f/ensure x)
           (is (= "/foo/bar" (:path x)))
           (is (= :baz (:value x)))
-          (is (and (> time 1000) (< time 1200)))))))
+          (is (>= time 900))
+          (is (<= time 1100))))))
 
   (testing "Task can be cancelled"
     (d/do*
@@ -125,18 +128,21 @@
           (reset! start (now))
           (f/ensure x)
           (is (nil? (:value x)))
-          (is (and (> time 1000) (< time 1200))))
+          (is (>= time 900))
+          (is (<= time 1100)))
         (let [x (xa/<!! listener :timeout 4000)
               time (- (now) @start)]
           (reset! start (now))
           (f/ensure x)
           (is (nil? (:value x)))
-          (is (and (> time 3000) (< time 3200))))
+          (is (>= time 2900))
+          (is (<= time 3100)))
         (let [x (xa/<!! listener :timeout 4000)
               time (- (now) @start)]
           (f/ensure x)
           (is (nil? (:value x)))
-          (is (and (> time 3000) (< time 3200)))
+          (is (>= time 2900))
+          (is (<= time 3100))
           (is (f/succ? (tm/cancel! timer task-id)))))))
   (testing "Task can be cancelled"
     (d/do*
@@ -149,3 +155,16 @@
         (is (f/succ? (tm/cancel! timer task-id)))
         (let [x (xa/<!! listener :timeout 1000)]
           (is (f/succ? x)))))))
+
+(deftest cancel-all-tasks
+  (testing "All Tasks can be cancelled at once"
+    (d/do*
+      (let [timer (tm/timer)
+            _ (d/defer (ev/close! timer))
+            listener (ca/chan 1)
+            _ (d/defer (ca/close! listener))
+            task-id1 (tm/once! timer 10000)
+            task-id2 (tm/once! timer 10000)]
+        (tm/cancel-all! timer)
+        (is (= :task-not-found @(tm/cancel! timer task-id1)))
+        (is (= :task-not-found @(tm/cancel! timer task-id2)))))))
