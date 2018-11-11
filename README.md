@@ -10,13 +10,13 @@ Experimental simple timer integrated with [nijohando/event](https://github.com/n
 #### Ligningen / Boot
 
 ```clojure
-[jp.nijohando/event.timer "0.1.0-SNAPSHOT"]
+[jp.nijohando/event.timer "0.1.0"]
 ```
 
 #### Clojure CLI / deps.edn
 
 ```clojure
-jp.nijohando/event.timer {:mvn/version "0.1.0-SNAPSHOT"}
+jp.nijohando/event.timer {:mvn/version "0.1.0"}
 ```
 
 ## Usage

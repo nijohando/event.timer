@@ -1,0 +1,5 @@
+{:main          "jp.nijohando.event.timer"
+ :output-dir     "target/out"
+ :target        :nodejs
+ :optimizations :none
+ :verbose       true}
